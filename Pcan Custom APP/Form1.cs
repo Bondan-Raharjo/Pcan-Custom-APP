@@ -149,11 +149,15 @@ namespace Pcan_Custom_APP
             // The message was successfully sent
             //
             if (stsResult == TPCANStatus.PCAN_ERROR_OK)
+            {
                 Console.WriteLine("Message was successfully SENT");
+                label6.Text = "Message was successfully SENT";
+            }
             // An error occurred.  We show the error.
             //			
             else
-                MessageBox.Show(GetFormatedError(stsResult));
+                MessageBox.Show(GetFormatedError(stsResult)); label6.Text = "Message was Failled ";
+
         }
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
