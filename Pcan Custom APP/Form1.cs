@@ -125,10 +125,17 @@ namespace Pcan_Custom_APP
             // We execute the "Read" function of the PCANBasic                
             //
             stsResult = m_IsFD ? ReadMessageFD() : ReadMessage();
-            if (stsResult != TPCANStatus.PCAN_ERROR_OK)
-                // If an error occurred, an information message is included
-                //
-                Console.WriteLine(GetFormatedError(stsResult));
+            if (stsResult != TPCANStatus.PCAN_ERROR_OK) {  Console.WriteLine(GetFormatedError(stsResult));}
+            // Abort Read Thread if it exists
+            //
+            if (m_ReadThread != null)
+            {
+                m_ReadThread.Abort();
+                m_ReadThread.Join();
+                m_ReadThread = null;
+            }
+
+            
         }
         private void button6_Click(object sender, EventArgs e)
         {
@@ -194,7 +201,11 @@ namespace Pcan_Custom_APP
             e.Handled = !char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar);
 
         }
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            ReadMessages();
 
+        }
         #region libary
         public static int GetLengthFromDLC(int dlc, bool isSTD)
         {
@@ -372,6 +383,22 @@ namespace Pcan_Custom_APP
 
             newTimestamp = Convert.ToUInt64(itsTimeStamp.micros + 1000 * itsTimeStamp.millis + 0x100000000 * 1000 * itsTimeStamp.millis_overflow);
             ProcessMessage(newMsg, newTimestamp);
+        }
+        private void ReadMessages()
+        {
+            TPCANStatus stsResult;
+
+            // We read at least one time the queue looking for messages.
+            // If a message is found, we look again trying to find more.
+            // If the queue is empty or an error occurr, we get out from
+            // the dowhile statement.
+            //			
+            do
+            {
+                stsResult = m_IsFD ? ReadMessageFD() : ReadMessage();
+                if (stsResult == TPCANStatus.PCAN_ERROR_ILLOPERATION)
+                    break;
+            } while (button1.Enabled && (!Convert.ToBoolean(stsResult & TPCANStatus.PCAN_ERROR_QRCVEMPTY)));
         }
 
         private bool m_IsFD;
@@ -652,5 +679,7 @@ namespace Pcan_Custom_APP
         }
 
         #endregion
+
+        
     }
 }
