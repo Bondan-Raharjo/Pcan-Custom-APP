@@ -51,26 +51,6 @@ namespace Pcan_Custom_APP
 
 
         }
-        private void button4_Click(object sender, EventArgs e)
-        {
-            
-            // Releases a current connected PCAN-Basic channel
-            //
-            PCANBasic.Uninitialize(m_PcanHandle);
-            button4.Enabled = false;
-            button1.Enabled = true;
-            button2.Enabled = true;
-            button3.Enabled = false;
-            // tmrRead.Enabled = false;
-            if (m_ReadThread != null)
-            {
-                m_ReadThread.Abort();
-                m_ReadThread.Join();
-                m_ReadThread = null;
-            }
-
-
-        }
         private void button2_Click(object sender, EventArgs e)
         {
             TPCANStatus stsResult;
@@ -118,6 +98,47 @@ namespace Pcan_Custom_APP
                 Environment.Exit(-1);
             }
         }
+        private void button3_Click(object sender, EventArgs e)
+        {
+            TPCANStatus stsResult;
+
+            // Send the message
+            //
+            stsResult = m_IsFD ? WriteFrameFD() : WriteFrame();
+
+            // The message was successfully sent
+            //
+            if (stsResult == TPCANStatus.PCAN_ERROR_OK)
+            {
+                Console.WriteLine("Message was successfully SENT");
+                label6.Text = "Message was successfully SENT";
+            }
+            // An error occurred.  We show the error.
+            //			
+            else
+                MessageBox.Show(GetFormatedError(stsResult)); label6.Text = "Message was Failled ";
+
+        }
+        private void button4_Click(object sender, EventArgs e)
+        {
+            
+            // Releases a current connected PCAN-Basic channel
+            //
+            PCANBasic.Uninitialize(m_PcanHandle);
+            button4.Enabled = false;
+            button1.Enabled = true;
+            button2.Enabled = true;
+            button3.Enabled = false;
+            // tmrRead.Enabled = false;
+            if (m_ReadThread != null)
+            {
+                m_ReadThread.Abort();
+                m_ReadThread.Join();
+                m_ReadThread = null;
+            }
+
+
+        }
         private void button5_Click(object sender, EventArgs e)
         {
             TPCANStatus stsResult;
@@ -144,27 +165,6 @@ namespace Pcan_Custom_APP
                 m_LastMsgsList.Clear();
                 lstMessages.Items.Clear();
             }
-        }
-        private void button3_Click(object sender, EventArgs e)
-        {
-            TPCANStatus stsResult;
-
-            // Send the message
-            //
-            stsResult = m_IsFD ? WriteFrameFD() : WriteFrame();
-
-            // The message was successfully sent
-            //
-            if (stsResult == TPCANStatus.PCAN_ERROR_OK)
-            {
-                Console.WriteLine("Message was successfully SENT");
-                label6.Text = "Message was successfully SENT";
-            }
-            // An error occurred.  We show the error.
-            //			
-            else
-                MessageBox.Show(GetFormatedError(stsResult)); label6.Text = "Message was Failled ";
-
         }
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
@@ -206,7 +206,8 @@ namespace Pcan_Custom_APP
             ReadMessages();
 
         }
-        #region libary
+
+        #region Funcion Pcan
         public static int GetLengthFromDLC(int dlc, bool isSTD)
         {
             if (dlc <= 8)
@@ -512,7 +513,7 @@ namespace Pcan_Custom_APP
       
         #endregion
 
-        #region Class LLibary
+        #region Class Pcan
         private class MessageStatus
         {
             private TPCANMsgFD m_Msg;
