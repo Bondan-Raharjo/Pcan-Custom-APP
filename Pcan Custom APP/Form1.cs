@@ -357,44 +357,6 @@ namespace Pcan_Custom_APP
             iBuffer = PCANBasic.TRACE_FILE_SINGLE | PCANBasic.TRACE_FILE_OVERWRITE;
             stsResult = PCANBasic.SetValue(m_PcanHandle, TPCANParameter.PCAN_TRACE_CONFIGURE, ref iBuffer, sizeof(UInt32));
         }
-        private void DisplayMessages()
-        {
-            ListViewItem lviCurrentItem;
-
-            lock (m_LastMsgsList.SyncRoot)
-            {
-                foreach (MessageStatus msgStatus in m_LastMsgsList)
-                {
-                    // Get the data to actualize
-                    //
-                    if (msgStatus.MarkedAsUpdated)
-                    {
-                        msgStatus.MarkedAsUpdated = false;
-                        lviCurrentItem = lstMessages.Items[msgStatus.Position];
-                        lviCurrentItem.SubItems[2].Text = GetLengthFromDLC(msgStatus.CANMsg.DLC, (msgStatus.CANMsg.MSGTYPE & TPCANMessageType.PCAN_MESSAGE_FD) == 0).ToString();
-                        lviCurrentItem.SubItems[3].Text = msgStatus.Count.ToString();
-                        lviCurrentItem.SubItems[4].Text = msgStatus.TimeString;
-                        lviCurrentItem.SubItems[5].Text = msgStatus.DataString;
-                    }
-                }
-            }
-        }
-        private void ReadMessages()
-        {
-            TPCANStatus stsResult;
-
-            // We read at least one time the queue looking for messages.
-            // If a message is found, we look again trying to find more.
-            // If the queue is empty or an error occurr, we get out from
-            // the dowhile statement.
-            //			
-            do
-            {
-                stsResult = m_IsFD ? ReadMessageFD() : ReadMessage();
-                if (stsResult == TPCANStatus.PCAN_ERROR_ILLOPERATION)
-                    break;
-            } while (button4.Enabled && (!Convert.ToBoolean(stsResult & TPCANStatus.PCAN_ERROR_QRCVEMPTY)));
-        }
         private void ProcessMessage(TPCANMsg theMsg, TPCANTimestamp itsTimeStamp)
         {
             TPCANMsgFD newMsg;
